@@ -7,4 +7,4 @@ const llm = new ChatGoogleGenerativeAI({
     streaming: true,
 });
 
-export default llm as any;
+export default llm;
