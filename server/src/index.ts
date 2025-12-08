@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import { agent } from "./graph/index.js";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { Command } from "@langchain/langgraph";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -15,15 +16,30 @@ app.get("/", (req, res) =>
 );
 
 app.post("/query", async (req, res) => {
-    const userMsg = req.body.query;
-    if (!userMsg)
+    const { query: userMsg, thread_id, resume } = req.body;
+    if (!thread_id)
         res.status(400).json({
             success: false,
-            message: "User Query Required!!",
+            message: "thread_id Required!!",
         });
-    const result = await agent.invoke({
-        messages: [new HumanMessage(userMsg)],
-    });
+
+    const config = {
+        configurable: {
+            thread_id,
+        },
+    };
+    let result = null;
+    if (resume) {
+        result = await agent.invoke(new Command({ resume }), config);
+        // result = await agent.getState(thread_id);
+    } else {
+        result = await agent.invoke(
+            {
+                messages: [new HumanMessage(userMsg)],
+            },
+            config
+        );
+    }
     res.json(result);
 });
 
