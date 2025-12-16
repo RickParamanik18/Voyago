@@ -1,3 +1,4 @@
+"use client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -16,8 +17,30 @@ import {
     InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
+import { useRef, useState } from "react";
+import Message from "@/components/Message";
+
+interface messageSchema {
+    role: string;
+    content: string;
+}
 
 export default function Home() {
+    const [query, setQuery] = useState("");
+    const query_input = useRef(null);
+    const [chats, setChats] = useState<messageSchema[]>([]);
+    const submitHandler = () => {
+        (query_input.current as any).value = "";
+        console.log(query);
+        setChats((prev) => [
+            ...prev,
+            { role: "me", content: query },
+            { role: "ai", content: "how can i help you" },
+        ]);
+
+        setQuery("");
+    };
+
     return (
         <div className="pb-3 px-10 w-[78vw] h-[92vh] flex flex-col justify-between">
             <div className="">
@@ -35,11 +58,19 @@ export default function Home() {
                     </DropdownMenu>
                 </div>
                 <Separator className="my-4" />
-                <div className="conversations max-h-[68vh] overflow-y-scroll"></div>
+                <div className="conversations max-h-[68vh] overflow-y-scroll">
+                    {chats.map((msg: messageSchema, index: number) => (
+                        <Message {...msg} key={index} />
+                    ))}
+                </div>
             </div>
 
             <InputGroup>
-                <InputGroupTextarea placeholder="Ask, Search or Chat..." />
+                <InputGroupTextarea
+                    placeholder="Ask, Search or Chat..."
+                    onChange={(e) => setQuery(e.target.value)}
+                    ref={query_input}
+                />
                 <InputGroupAddon align="block-end">
                     <InputGroupButton
                         variant="outline"
@@ -72,7 +103,8 @@ export default function Home() {
                         variant="default"
                         className="rounded-full"
                         size="icon-xs"
-                        disabled
+                        disabled={query.length == 0}
+                        onClick={submitHandler}
                     >
                         <ArrowUpIcon />
                         <span className="sr-only">Send</span>
