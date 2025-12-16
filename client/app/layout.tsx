@@ -8,18 +8,18 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <SidebarProvider>
-            <html lang="en" className="hydrated">
-                <body cz-shortcut-listen="true">
-                    <SidebarProvider>
-                        <AppSidebar />
-                        <main>
-                            <SidebarTrigger />
-                            {children}
-                        </main>
-                    </SidebarProvider>
-                </body>
-            </html>
-        </SidebarProvider>
+        // <SidebarProvider>
+        <html lang="en" className="hydrated">
+            <body cz-shortcut-listen="true">
+                {/* <SidebarProvider>
+                        <AppSidebar /> */}
+                <main>
+                    {/* <SidebarTrigger /> */}
+                    {children}
+                </main>
+                {/* </SidebarProvider> */}
+            </body>
+        </html>
+        // </SidebarProvider>
     );
 }

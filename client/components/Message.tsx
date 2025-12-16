@@ -17,12 +17,6 @@ interface messageSchema {
 
 const Message = ({ role, content }: messageSchema) => {
     return (
-        // <div>
-        //     <div className="flex bg-amber-200 ">
-        //         <p>{role + " : "}</p>
-        //         <p>{content}</p>
-        //     </div>
-        // </div>
         <Item variant="outline" className="mt-5">
             <ItemMedia>
                 <Avatar className="size-10 bg-gray-300 rounded-full flex justify-center items-center font-bold">

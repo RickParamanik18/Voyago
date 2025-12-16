@@ -19,6 +19,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useRef, useState } from "react";
 import Message from "@/components/Message";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 interface messageSchema {
     role: string;
@@ -42,75 +44,79 @@ export default function Home() {
     };
 
     return (
-        <div className="pb-3 px-10 w-[78vw] h-[92vh] flex flex-col justify-between">
-            <div className="">
-                <div className="nav flex justify-between">
-                    <span className="text-xl font-semibold">VoyaGo</span>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Avatar>
-                                <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-20" align="start">
-                            <DropdownMenuItem>Log Out</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+        <SidebarProvider>
+            <AppSidebar />
+            <SidebarTrigger />
+            <div className="pb-3 px-10 w-screen md:w-[78vw] h-[92vh] flex flex-col justify-between">
+                <div className="">
+                    <div className="nav flex justify-between">
+                        <span className="text-xl font-semibold">VoyaGo</span>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Avatar>
+                                    <AvatarFallback>CN</AvatarFallback>
+                                </Avatar>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-20" align="start">
+                                <DropdownMenuItem>Log Out</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Separator className="my-4" />
+                    <div className="conversations max-h-[68vh] overflow-y-scroll">
+                        {chats.map((msg: messageSchema, index: number) => (
+                            <Message {...msg} key={index} />
+                        ))}
+                    </div>
                 </div>
-                <Separator className="my-4" />
-                <div className="conversations max-h-[68vh] overflow-y-scroll">
-                    {chats.map((msg: messageSchema, index: number) => (
-                        <Message {...msg} key={index} />
-                    ))}
-                </div>
-            </div>
 
-            <InputGroup>
-                <InputGroupTextarea
-                    placeholder="Ask, Search or Chat..."
-                    onChange={(e) => setQuery(e.target.value)}
-                    ref={query_input}
-                />
-                <InputGroupAddon align="block-end">
-                    <InputGroupButton
-                        variant="outline"
-                        className="rounded-full"
-                        size="icon-xs"
-                    >
-                        <IconPlus />
-                    </InputGroupButton>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <InputGroupButton variant="ghost">
-                                Auto
-                            </InputGroupButton>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            side="top"
-                            align="start"
-                            className="[--radius:0.95rem]"
+                <InputGroup>
+                    <InputGroupTextarea
+                        placeholder="Ask, Search or Chat..."
+                        onChange={(e) => setQuery(e.target.value)}
+                        ref={query_input}
+                    />
+                    <InputGroupAddon align="block-end">
+                        <InputGroupButton
+                            variant="outline"
+                            className="rounded-full"
+                            size="icon-xs"
                         >
-                            <DropdownMenuItem>Auto</DropdownMenuItem>
-                            <DropdownMenuItem>Agent</DropdownMenuItem>
-                            <DropdownMenuItem>Manual</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <InputGroupText className="ml-auto">
-                        52% used
-                    </InputGroupText>
-                    <Separator orientation="vertical" className="h-1" />
-                    <InputGroupButton
-                        variant="default"
-                        className="rounded-full"
-                        size="icon-xs"
-                        disabled={query.length == 0}
-                        onClick={submitHandler}
-                    >
-                        <ArrowUpIcon />
-                        <span className="sr-only">Send</span>
-                    </InputGroupButton>
-                </InputGroupAddon>
-            </InputGroup>
-        </div>
+                            <IconPlus />
+                        </InputGroupButton>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <InputGroupButton variant="ghost">
+                                    Auto
+                                </InputGroupButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="top"
+                                align="start"
+                                className="[--radius:0.95rem]"
+                            >
+                                <DropdownMenuItem>Auto</DropdownMenuItem>
+                                <DropdownMenuItem>Agent</DropdownMenuItem>
+                                <DropdownMenuItem>Manual</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <InputGroupText className="ml-auto">
+                            52% used
+                        </InputGroupText>
+                        <Separator orientation="vertical" className="h-1" />
+                        <InputGroupButton
+                            variant="default"
+                            className="rounded-full"
+                            size="icon-xs"
+                            disabled={query.length == 0}
+                            onClick={submitHandler}
+                        >
+                            <ArrowUpIcon />
+                            <span className="sr-only">Send</span>
+                        </InputGroupButton>
+                    </InputGroupAddon>
+                </InputGroup>
+            </div>
+        </SidebarProvider>
     );
 }
