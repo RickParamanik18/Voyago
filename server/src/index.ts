@@ -4,12 +4,20 @@ import cors from "cors";
 import { agent } from "./graph/index.js";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { Command } from "@langchain/langgraph";
+import authRouter from "./routes/auth.route.js";
+import connectDB from "./config/db.js";
+import cookieParser from "cookie-parser";
+
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
+
+app.use("/api/auth", authRouter);
 
 app.get("/", (req, res) =>
     res.json({ success: true, message: "Hello From Server.." })
