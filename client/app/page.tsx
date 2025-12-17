@@ -17,10 +17,11 @@ import {
     InputGroupTextarea,
 } from "@/components/ui/input-group";
 import { Separator } from "@/components/ui/separator";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "@/components/Message";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { v4 as uuidv4 } from "uuid";
 
 interface messageSchema {
     role: string;
@@ -28,12 +29,20 @@ interface messageSchema {
 }
 
 export default function Home() {
+    const [threadId, setThreadId] = useState<string | null>(null);
     const [query, setQuery] = useState("");
     const query_input = useRef(null);
     const [chats, setChats] = useState<messageSchema[]>([]);
+    const newChatHandler = () => {
+        const thread_id = uuidv4();
+        setThreadId(thread_id);
+        //add this thread_id to the user DB
+    };
     const submitHandler = () => {
         (query_input.current as any).value = "";
         console.log(query);
+        //if its a new chat then create a new thread id
+        if (!threadId) newChatHandler();
         setChats((prev) => [
             ...prev,
             { role: "me", content: query },
@@ -43,9 +52,14 @@ export default function Home() {
         setQuery("");
     };
 
+    useEffect(() => {
+        console.log("Thread ID:", threadId);
+        // Load chat history based on threadId
+    }, [threadId]);
+
     return (
         <SidebarProvider>
-            <AppSidebar />
+            <AppSidebar newChatHandler={newChatHandler} />
             <SidebarTrigger />
             <div className="pb-3 px-10 w-screen md:w-[78vw] h-[92vh] flex flex-col justify-between">
                 <div className="">

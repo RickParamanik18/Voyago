@@ -13,8 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const router = useRouter();
-
 interface formDataType {
     login_email?: string;
     login_password?: string;
@@ -24,6 +22,7 @@ interface formDataType {
 }
 
 export default function Auth() {
+    const router = useRouter();
     const [formData, setFormData] = useState<formDataType>({});
 
     const handleChange = async (

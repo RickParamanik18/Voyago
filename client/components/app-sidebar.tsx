@@ -41,14 +41,17 @@ const items = [
     },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ newChatHandler }: { newChatHandler: () => void }) {
     return (
         <Sidebar>
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <div className="text-center my-3">
-                            <Button variant={"outline"}>
+                            <Button
+                                variant={"outline"}
+                                onClick={newChatHandler}
+                            >
                                 New Chat <IconPlus />
                             </Button>
                         </div>
