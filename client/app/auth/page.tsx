@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface formDataType {
@@ -43,11 +43,12 @@ export default function Auth() {
                 return;
             }
 
-            const res = await fetch("/api/login", {
+            const res = await fetch("http://localhost:5000/api/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     email: formData.login_email,
                     password: formData.login_password,
@@ -78,11 +79,12 @@ export default function Auth() {
                 return;
             }
 
-            const res = await fetch("/api/signup", {
+            const res = await fetch("http://localhost:5000/api/auth/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     name: formData.signup_name,
                     email: formData.signup_email,
@@ -102,6 +104,16 @@ export default function Auth() {
             console.error("Signup error:", error.message);
         }
     };
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/me", {
+            method: "GET",
+            credentials: "include",
+        }).then(async (res) => {
+            const temp = await res.json();
+            if (temp.success) router.push("/");
+        });
+    });
 
     return (
         <div className="flex justify-center items-center h-screen">

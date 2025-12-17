@@ -7,6 +7,7 @@ import { Command } from "@langchain/langgraph";
 import authRouter from "./routes/auth.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 connectDB();
 
@@ -14,7 +15,13 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
-app.use(cors());
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+    })
+);
+
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
@@ -22,6 +29,32 @@ app.use("/api/auth", authRouter);
 app.get("/", (req, res) =>
     res.json({ success: true, message: "Hello From Server.." })
 );
+
+app.get("/api/me", (req, res) => {
+    const token = req.cookies.authToken;
+
+    if (!token) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Not Authorized" });
+    }
+
+    try {
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET as string
+        ) as any;
+
+        return res.json({
+            success: true,
+            data: decoded,
+        });
+    } catch (err) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Invalid token" });
+    }
+});
 
 app.post("/query", async (req, res) => {
     const { query: userMsg, thread_id, resume } = req.body;

@@ -22,6 +22,7 @@ import Message from "@/components/Message";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 
 interface messageSchema {
     role: string;
@@ -33,6 +34,8 @@ export default function Home() {
     const [query, setQuery] = useState("");
     const query_input = useRef(null);
     const [chats, setChats] = useState<messageSchema[]>([]);
+    const router = useRouter();
+
     const newChatHandler = () => {
         const thread_id = uuidv4();
         setThreadId(thread_id);
@@ -56,6 +59,16 @@ export default function Home() {
         console.log("Thread ID:", threadId);
         // Load chat history based on threadId
     }, [threadId]);
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/me", {
+            method: "GET",
+            credentials: "include",
+        }).then(async (res) => {
+            const temp = await res.json();
+            if (!temp.success) router.push("/auth");
+        });
+    });
 
     return (
         <SidebarProvider>
