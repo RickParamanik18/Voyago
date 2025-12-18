@@ -58,7 +58,7 @@ export default function Auth() {
             });
 
             const data = await res.json();
-
+            console.log(data);
             if (!res.ok) {
                 throw new Error(data.message || "Login failed");
             }
@@ -113,10 +113,14 @@ export default function Auth() {
         fetch("http://localhost:5000/api/me", {
             method: "GET",
             credentials: "include",
-        }).then(async (res) => {
-            const temp = await res.json();
-            if (temp.success) router.push("/");
-        });
+        })
+            .then(async (res) => {
+                const temp = await res.json();
+                if (temp.success) router.push("/");
+            })
+            .catch((err) => {
+                console.log("Not logged in:", err);
+            });
     });
 
     return (

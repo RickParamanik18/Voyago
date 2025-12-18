@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import User from "../model/user.model.js";
+import { getJWTToken } from "../utils/utility.js";
 
 const cookieOptions = {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -39,10 +39,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
             password: hashedPassword,
         });
 
-        const token = jwt.sign(
-            { _id: user._id, name: user.name, threads: user.threads },
-            process.env.JWT_SECRET as string
-        );
+        const token = getJWTToken(user._id);
         res.cookie("authToken", token, cookieOptions);
 
         return res.status(201).json({
@@ -82,10 +79,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
                 .json({ success: false, message: "Invalid credentials" });
         }
 
-        const token = jwt.sign(
-            { _id: user._id, name: user.name, threads: user.threads },
-            process.env.JWT_SECRET as string
-        );
+        const token = getJWTToken(user._id);
         res.cookie("authToken", token, cookieOptions);
 
         return res.status(200).json({

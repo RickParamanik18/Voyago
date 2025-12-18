@@ -23,6 +23,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 interface messageSchema {
     role: string;
@@ -34,6 +36,7 @@ export default function Home() {
     const [query, setQuery] = useState("");
     const query_input = useRef(null);
     const [chats, setChats] = useState<messageSchema[]>([]);
+    const [userData, setUserData] = useState<any>({ threads: [] });
     const router = useRouter();
 
     const newChatHandler = () => {
@@ -56,7 +59,30 @@ export default function Home() {
     };
 
     useEffect(() => {
-        console.log("Thread ID:", threadId);
+        if (!threadId) return;
+
+        //update DB it is a  new thread id
+        if (!userData.threads.includes(threadId)) {
+            console.log("Thread IDDD:", threadId);
+            fetch("http://localhost:5000/api/user/add_thread", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ thread_id: threadId }),
+            }).then(async (res) => {
+                const result = await res.json();
+                console.log("Add Thread Result:", result);
+                setUserData(result.data);
+
+                if (!result.success) {
+                    toast.error("Failed to create new Chat:" + result.message);
+                    return;
+                }
+                toast.success("New Chat Created");
+            });
+        }
         // Load chat history based on threadId
     }, [threadId]);
 
@@ -66,13 +92,18 @@ export default function Home() {
             credentials: "include",
         }).then(async (res) => {
             const temp = await res.json();
+            setUserData(temp.data);
             if (!temp.success) router.push("/auth");
         });
     });
 
     return (
         <SidebarProvider>
-            <AppSidebar newChatHandler={newChatHandler} />
+            <AppSidebar
+                setThreadId={setThreadId}
+                newChatHandler={newChatHandler}
+                threads={userData.threads}
+            />
             <SidebarTrigger />
             <div className="pb-3 px-10 w-screen md:w-[78vw] h-[92vh] flex flex-col justify-between">
                 <div className="">
@@ -144,6 +175,7 @@ export default function Home() {
                     </InputGroupAddon>
                 </InputGroup>
             </div>
+            <Toaster />
         </SidebarProvider>
     );
 }

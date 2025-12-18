@@ -8,6 +8,8 @@ import authRouter from "./routes/auth.route.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
+import userRouter from "./routes/user.route.js";
+import User from "./model/user.model.js";
 
 connectDB();
 
@@ -25,12 +27,13 @@ app.use(
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 app.get("/", (req, res) =>
     res.json({ success: true, message: "Hello From Server.." })
 );
 
-app.get("/api/me", (req, res) => {
+app.get("/api/me", async (req, res) => {
     const token = req.cookies.authToken;
 
     if (!token) {
@@ -40,14 +43,26 @@ app.get("/api/me", (req, res) => {
     }
 
     try {
-        const decoded = jwt.verify(
+        const result = jwt.verify(
             token,
             process.env.JWT_SECRET as string
         ) as any;
 
-        return res.json({
+        if (!result || !result._id) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Invalid token" });
+        }
+        const user = await User.findOne({ _id: result._id });
+
+        return res.status(200).json({
             success: true,
-            data: decoded,
+            data: {
+                _id: user?._id,
+                name: user?.name,
+                email: user?.email,
+                threads: user?.threads,
+            },
         });
     } catch (err) {
         return res

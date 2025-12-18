@@ -41,7 +41,15 @@ const items = [
     },
 ];
 
-export function AppSidebar({ newChatHandler }: { newChatHandler: () => void }) {
+export function AppSidebar({
+    setThreadId,
+    newChatHandler,
+    threads,
+}: {
+    setThreadId: (threadId: string) => void;
+    newChatHandler: () => void;
+    threads: string[];
+}) {
     return (
         <Sidebar>
             <SidebarContent>
@@ -59,13 +67,20 @@ export function AppSidebar({ newChatHandler }: { newChatHandler: () => void }) {
                     <SidebarGroupLabel>Chat History</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
+                            {threads.map((thread_id, index) => (
+                                <SidebarMenuItem key={index}>
                                     <SidebarMenuButton asChild>
-                                        <a href={item.url}>
+                                        {/* <a href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
-                                        </a>
+                                        </a> */}
+                                        <span
+                                            onClick={() =>
+                                                setThreadId(thread_id)
+                                            }
+                                        >
+                                            {thread_id.substring(0, 10)}
+                                        </span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
