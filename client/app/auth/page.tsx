@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 interface formDataType {
     login_email?: string;
@@ -39,7 +41,7 @@ export default function Auth() {
     const handleLogin = async () => {
         try {
             if (!formData.login_email || !formData.login_password) {
-                alert("Email and password are required");
+                toast.warning("Email and password are required");
                 return;
             }
 
@@ -62,9 +64,10 @@ export default function Auth() {
             }
 
             console.log("Login success:", data);
+            toast.success("Login successful!");
             router.push("/");
         } catch (error: any) {
-            console.error("Login error:", error.message);
+            toast.error("Login error:", error.message);
         }
     };
 
@@ -75,7 +78,7 @@ export default function Auth() {
                 !formData.signup_email ||
                 !formData.signup_password
             ) {
-                alert("All fields are required");
+                toast.warning("All fields are required");
                 return;
             }
 
@@ -99,9 +102,10 @@ export default function Auth() {
             }
 
             console.log("Signup success:", data);
+            toast.success("Signup successful!");
             router.push("/");
         } catch (error: any) {
-            console.error("Signup error:", error.message);
+            toast.error("Signup error:", error.message);
         }
     };
 
@@ -117,6 +121,21 @@ export default function Auth() {
 
     return (
         <div className="flex justify-center items-center h-screen">
+            {/* <Button
+                variant="outline"
+                onClick={() =>
+                    toast("Event has been created", {
+                        description: "Sunday, December 03, 2023 at 9:00 AM",
+                        action: {
+                            label: "Undo",
+                            onClick: () => console.log("Undo"),
+                        },
+                    })
+                }
+            >
+                Show Toast
+            </Button> */}
+            <Toaster />
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <Tabs defaultValue="login">
                     <TabsList>
