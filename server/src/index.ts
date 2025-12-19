@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 import "dotenv/config";
 import cors from "cors";
 import { agent } from "./graph/index.js";
@@ -10,10 +12,13 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import userRouter from "./routes/user.route.js";
 import User from "./model/user.model.js";
+import { initSocket } from "./socket/index.js";
+import { registerChatHandlers } from "./socket/chat.socket.js";
 
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
@@ -28,6 +33,9 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+
+const io = initSocket(server);
+registerChatHandlers(io);
 
 app.get("/", (req, res) =>
     res.json({ success: true, message: "Hello From Server.." })
@@ -99,6 +107,6 @@ app.post("/query", async (req, res) => {
     res.json(result);
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running http://localhost:${PORT}`);
 });
