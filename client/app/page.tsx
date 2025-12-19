@@ -25,9 +25,10 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { getSocket } from "@/lib/socket";
 
 interface messageSchema {
-    role: string;
+    sender: string;
     content: string;
 }
 
@@ -43,24 +44,42 @@ export default function Home() {
         const thread_id = uuidv4();
         setThreadId(thread_id);
         //add this thread_id to the user DB
+        return thread_id;
     };
     const submitHandler = () => {
         (query_input.current as any).value = "";
         console.log(query);
         //if its a new chat then create a new thread id
-        if (!threadId) newChatHandler();
+        let newThreadId = threadId;
+        if (!threadId) newThreadId = newChatHandler();
+        const socket = getSocket();
+        socket.emit("send-message", {
+            roomId: newThreadId,
+            message: query,
+            sender: userData?.name,
+        });
+
         setChats((prev) => [
             ...prev,
-            { role: "me", content: query },
-            { role: "ai", content: "how can i help you" },
+            { sender: userData.name, content: query },
+            // { role: "ai", content: "how can i help you" },
         ]);
 
         setQuery("");
     };
 
+    const getAvatarName = () => {
+        return userData?.name
+            ? userData.name
+                  .split(" ")
+                  .map((s: string) => s.charAt(0).toUpperCase())
+                  .join("")
+            : "*";
+    };
+
     useEffect(() => {
         if (!threadId) return;
-
+        console.log("Thread ID Changed:", threadId);
         //update DB it is a  new thread id
         if (!userData.threads.includes(threadId)) {
             console.log("Thread IDDD:", threadId);
@@ -84,6 +103,8 @@ export default function Home() {
             });
         }
         // Load chat history based on threadId
+        const socket = getSocket();
+        socket.emit("join-room", { roomId: threadId, name: userData?.name });
     }, [threadId]);
 
     useEffect(() => {
@@ -95,14 +116,31 @@ export default function Home() {
             setUserData(temp.data);
             if (!temp.success) router.push("/auth");
         });
-    });
+
+        const socket = getSocket();
+        socket.on("connect", () => {
+            console.log("Socket connected:", socket.id);
+        });
+        socket.on("new-message", ({ message, sender }) => {
+            console.log(`New message from ${sender}: ${message}`);
+            setChats((prev) => [...prev, { sender, content: message }]);
+        });
+        socket.on("disconnect", () => {
+            console.log("Disconnected");
+        });
+
+        return () => {
+            socket.off("connect");
+            socket.off("disconnect");
+        };
+    }, []);
 
     return (
         <SidebarProvider>
             <AppSidebar
                 setThreadId={setThreadId}
                 newChatHandler={newChatHandler}
-                threads={userData.threads}
+                threads={userData?.threads || []}
             />
             <SidebarTrigger />
             <div className="pb-3 px-10 w-screen md:w-[78vw] h-[92vh] flex flex-col justify-between">
@@ -112,7 +150,9 @@ export default function Home() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Avatar>
-                                    <AvatarFallback>CN</AvatarFallback>
+                                    <AvatarFallback>
+                                        {getAvatarName()}
+                                    </AvatarFallback>
                                 </Avatar>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-20" align="start">

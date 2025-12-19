@@ -11,17 +11,22 @@ import { Copy } from "lucide-react";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 
 interface messageSchema {
-    role: string;
+    sender: string;
     content: string;
 }
-
-const Message = ({ role, content }: messageSchema) => {
+const getAvatarName = (str: string) => {
+    return str
+        .split(" ")
+        .map((s: string) => s.charAt(0).toUpperCase())
+        .join("");
+};
+const Message = ({ sender, content }: messageSchema) => {
     return (
         <Item variant="outline" className="mt-5">
             <ItemMedia>
                 <Avatar className="size-10 bg-gray-300 rounded-full flex justify-center items-center font-bold">
                     {/* <AvatarImage src="https://github.com/evilrabbit.png" /> */}
-                    <AvatarFallback>ER</AvatarFallback>
+                    <AvatarFallback>{getAvatarName(sender)}</AvatarFallback>
                 </Avatar>
             </ItemMedia>
             <ItemContent>
