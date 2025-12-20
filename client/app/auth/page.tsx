@@ -45,17 +45,20 @@ export default function Auth() {
                 return;
             }
 
-            const res = await fetch("http://localhost:5000/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    email: formData.login_email,
-                    password: formData.login_password,
-                }),
-            });
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/login`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        email: formData.login_email,
+                        password: formData.login_password,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -82,18 +85,21 @@ export default function Auth() {
                 return;
             }
 
-            const res = await fetch("http://localhost:5000/api/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    name: formData.signup_name,
-                    email: formData.signup_email,
-                    password: formData.signup_password,
-                }),
-            });
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/signup`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        name: formData.signup_name,
+                        email: formData.signup_email,
+                        password: formData.signup_password,
+                    }),
+                }
+            );
 
             const data = await res.json();
             router.push("/");
@@ -110,7 +116,7 @@ export default function Auth() {
     };
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/me", {
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/me`, {
             method: "GET",
             credentials: "include",
         })

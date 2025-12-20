@@ -44,18 +44,21 @@ export default function Home() {
 
     const handleAiResponse = async (query: string) => {
         // return `This is a AI response`;
-        let result: any = await fetch("http://localhost:5000/api/agent/query", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                thread_id: threadId,
-                query: query,
-                resume: hasInterrupt,
-            }),
-        });
+        let result: any = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/agent/query`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    thread_id: threadId,
+                    query: query,
+                    resume: hasInterrupt,
+                }),
+            }
+        );
         result = await result.json();
         console.log("AI Response Raw:", result);
         setHasInterrupt(result.data.hasInterrupt);
@@ -78,7 +81,7 @@ export default function Home() {
         sendMessage(newThreadId!);
 
         //adding user msg to the DB
-        fetch("http://localhost:5000/api/thread/add-message", {
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/thread/add-message`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -132,7 +135,7 @@ export default function Home() {
         //update DB it is a  new thread id
         if (!userData.threads.includes(threadId)) {
             console.log("Thread IDDD:", threadId);
-            fetch("http://localhost:5000/api/user/add_thread", {
+            fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/user/add_thread`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -152,7 +155,7 @@ export default function Home() {
             });
         }
         // Load chat history based on threadId
-        fetch("http://localhost:5000/api/thread/get-messages", {
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/thread/get-messages`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -169,7 +172,7 @@ export default function Home() {
     }, [threadId]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/me", {
+        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/me`, {
             method: "GET",
             credentials: "include",
         }).then(async (res) => {
