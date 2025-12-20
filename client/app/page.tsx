@@ -65,6 +65,20 @@ export default function Home() {
             // { role: "ai", content: "how can i help you" },
         ]);
 
+        fetch("http://localhost:5000/api/thread/add-message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                threadId,
+                message: { sender: userData.name, content: query },
+            }),
+        }).then(async (res) => {
+            const temp = await res.json();
+        });
+
         setQuery("");
     };
 
@@ -103,6 +117,18 @@ export default function Home() {
             });
         }
         // Load chat history based on threadId
+        fetch("http://localhost:5000/api/thread/get-messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ threadId }),
+        }).then(async (res) => {
+            const temp = await res.json();
+            setChats(temp.data?.chats || []);
+        });
+
         const socket = getSocket();
         socket.emit("join-room", { roomId: threadId, name: userData?.name });
     }, [threadId]);

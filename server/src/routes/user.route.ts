@@ -5,6 +5,7 @@ import authMiddleware, { AuthRequest } from "../middleware/auth.middleware.js";
 import { get } from "http";
 import { getJWTToken } from "../utils/utility.js";
 import mongoose from "mongoose";
+import Threads from "../model/thread.model.js";
 
 const cookieOptions = {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -34,6 +35,10 @@ userRouter.put(
                 { $push: { threads: thread_id } },
                 { new: true }
             )) as mongoose.Document;
+
+            await Threads.create({
+                threadId: thread_id,
+            });
 
             const token = getJWTToken(user._id);
 

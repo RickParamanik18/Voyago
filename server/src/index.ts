@@ -14,6 +14,7 @@ import userRouter from "./routes/user.route.js";
 import User from "./model/user.model.js";
 import { initSocket } from "./socket/index.js";
 import { registerChatHandlers } from "./socket/chat.socket.js";
+import threadRouter from "./routes/thread.route.js";
 
 connectDB();
 
@@ -33,6 +34,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/thread", threadRouter);
 
 const io = initSocket(server);
 registerChatHandlers(io);
