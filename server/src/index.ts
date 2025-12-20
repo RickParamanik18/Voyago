@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import http from "http";
 import { Server } from "socket.io";
 import "dotenv/config";
@@ -15,6 +15,7 @@ import User from "./model/user.model.js";
 import { initSocket } from "./socket/index.js";
 import { registerChatHandlers } from "./socket/chat.socket.js";
 import threadRouter from "./routes/thread.route.js";
+import agentRouter from "./routes/agent.route.js";
 
 connectDB();
 
@@ -35,6 +36,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/thread", threadRouter);
+app.use("/api/agent", agentRouter);
 
 const io = initSocket(server);
 registerChatHandlers(io);
@@ -79,34 +81,6 @@ app.get("/api/me", async (req, res) => {
             .status(401)
             .json({ success: false, message: "Invalid token" });
     }
-});
-
-app.post("/query", async (req, res) => {
-    const { query: userMsg, thread_id, resume } = req.body;
-    if (!thread_id)
-        res.status(400).json({
-            success: false,
-            message: "thread_id Required!!",
-        });
-
-    const config = {
-        configurable: {
-            thread_id,
-        },
-    };
-    let result = null;
-    if (resume) {
-        result = await agent.invoke(new Command({ resume }), config);
-        // result = await agent.getState(thread_id);
-    } else {
-        result = await agent.invoke(
-            {
-                messages: [new HumanMessage(userMsg)],
-            },
-            config
-        );
-    }
-    res.json(result);
 });
 
 server.listen(PORT, () => {

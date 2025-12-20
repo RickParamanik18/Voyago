@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { Copy } from "lucide-react";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
+import ReactMarkdown from "react-markdown";
 
 interface messageSchema {
     sender: string;
@@ -31,7 +32,9 @@ const Message = ({ sender, content }: messageSchema) => {
             </ItemMedia>
             <ItemContent>
                 {/* <ItemTitle>Evil Rabbit</ItemTitle> */}
-                <ItemDescription>{content}</ItemDescription>
+                <ItemDescription>
+                    <ReactMarkdown>{content}</ReactMarkdown>
+                </ItemDescription>
             </ItemContent>
             <ItemActions>
                 <Button

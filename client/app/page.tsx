@@ -39,10 +39,27 @@ export default function Home() {
     const [chats, setChats] = useState<messageSchema[]>([]);
     const [userData, setUserData] = useState<any>({ threads: [] });
     const [sendTo, setSendTo] = useState<"participants" | "ai">("participants");
+    const [hasInterrupt, setHasInterrupt] = useState<boolean>(false);
     const router = useRouter();
 
-    const handleAiResponse = (query: string) => {
-        return `This is a AI response`;
+    const handleAiResponse = async (query: string) => {
+        // return `This is a AI response`;
+        let result: any = await fetch("http://localhost:5000/api/agent/query", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                thread_id: threadId,
+                query: query,
+                resume: hasInterrupt,
+            }),
+        });
+        result = await result.json();
+        console.log("AI Response Raw:", result);
+        setHasInterrupt(result.data.hasInterrupt);
+        return result?.data.response;
     };
     const newChatHandler = () => {
         const thread_id = uuidv4();
@@ -50,7 +67,7 @@ export default function Home() {
         //add this thread_id to the user DB
         return thread_id;
     };
-    const submitHandler = () => {
+    const submitHandler = async () => {
         (query_input.current as any).value = "";
         console.log(query);
         //if its a new chat then create a new thread id
@@ -75,9 +92,11 @@ export default function Home() {
             const temp = await res.json();
         });
 
+        console.log("Send To:", sendTo);
+
         //if sending to ai
         if (sendTo === "ai") {
-            const aiResponse = handleAiResponse(query);
+            const aiResponse = await handleAiResponse(query);
             sendMessage(newThreadId!, "A I", aiResponse);
         }
         setQuery("");
