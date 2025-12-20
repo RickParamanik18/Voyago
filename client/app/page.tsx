@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { IconCheck, IconInfoCircle, IconPlus } from "@tabler/icons-react";
-import { ArrowUpIcon, Search } from "lucide-react";
+import { ArrowUpIcon, ChevronDown, Search } from "lucide-react";
 import {
     InputGroup,
     InputGroupAddon,
@@ -38,8 +38,12 @@ export default function Home() {
     const query_input = useRef(null);
     const [chats, setChats] = useState<messageSchema[]>([]);
     const [userData, setUserData] = useState<any>({ threads: [] });
+    const [sendTo, setSendTo] = useState<"participants" | "ai">("participants");
     const router = useRouter();
 
+    const handleAiResponse = (query: string) => {
+        return `This is a AI response`;
+    };
     const newChatHandler = () => {
         const thread_id = uuidv4();
         setThreadId(thread_id);
@@ -52,19 +56,11 @@ export default function Home() {
         //if its a new chat then create a new thread id
         let newThreadId = threadId;
         if (!threadId) newThreadId = newChatHandler();
-        const socket = getSocket();
-        socket.emit("send-message", {
-            roomId: newThreadId,
-            message: query,
-            sender: userData?.name,
-        });
 
-        setChats((prev) => [
-            ...prev,
-            { sender: userData.name, content: query },
-            // { role: "ai", content: "how can i help you" },
-        ]);
+        // sending message to participants
+        sendMessage(newThreadId!);
 
+        //adding user msg to the DB
         fetch("http://localhost:5000/api/thread/add-message", {
             method: "POST",
             headers: {
@@ -79,7 +75,27 @@ export default function Home() {
             const temp = await res.json();
         });
 
+        //if sending to ai
+        if (sendTo === "ai") {
+            const aiResponse = handleAiResponse(query);
+            sendMessage(newThreadId!, "A I", aiResponse);
+        }
         setQuery("");
+    };
+
+    const sendMessage = (
+        roomId: string,
+        sender: string = userData.name,
+        message: string = query
+    ) => {
+        const socket = getSocket();
+        socket.emit("send-message", {
+            roomId,
+            message,
+            sender,
+        });
+
+        setChats((prev) => [...prev, { sender, content: message }]);
     };
 
     const getAvatarName = () => {
@@ -171,13 +187,14 @@ export default function Home() {
             <SidebarTrigger />
             <div className="pb-3 px-10 w-screen md:w-[78vw] h-[92vh] flex flex-col justify-between">
                 <div className="">
-                    <div className="nav flex justify-between">
+                    <div className="nav flex justify-between items-center py-4">
                         <span className="text-xl font-semibold">VoyaGo</span>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Avatar>
                                     <AvatarFallback>
                                         {getAvatarName()}
+                                        <ChevronDown size={"14px"} />
                                     </AvatarFallback>
                                 </Avatar>
                             </DropdownMenuTrigger>
@@ -186,7 +203,7 @@ export default function Home() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    <Separator className="my-4" />
+                    <Separator />
                     <div className="conversations max-h-[68vh] overflow-y-scroll">
                         {chats.map((msg: messageSchema, index: number) => (
                             <Message {...msg} key={index} />
@@ -211,7 +228,10 @@ export default function Home() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <InputGroupButton variant="ghost">
-                                    Auto
+                                    {sendTo === "participants"
+                                        ? "Participants"
+                                        : "VoyaGo AI"}
+                                    <ChevronDown />
                                 </InputGroupButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
@@ -219,9 +239,17 @@ export default function Home() {
                                 align="start"
                                 className="[--radius:0.95rem]"
                             >
-                                <DropdownMenuItem>Auto</DropdownMenuItem>
-                                <DropdownMenuItem>Agent</DropdownMenuItem>
-                                <DropdownMenuItem>Manual</DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setSendTo("participants")}
+                                >
+                                    Participants
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => setSendTo("ai")}
+                                >
+                                    VoyaGo AI
+                                </DropdownMenuItem>
+                                {/* <DropdownMenuItem>Manual</DropdownMenuItem> */}
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <InputGroupText className="ml-auto">
